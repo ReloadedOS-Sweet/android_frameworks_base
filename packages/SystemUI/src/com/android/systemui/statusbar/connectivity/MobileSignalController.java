@@ -22,6 +22,7 @@ import static com.android.settingslib.mobile.MobileMappings.toIconKey;
 import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -33,8 +34,11 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
@@ -97,6 +101,10 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     boolean mInflateSignalStrengths = false;
     @VisibleForTesting
     final MobileStatusTracker mMobileStatusTracker;
+
+    private final ContentResolver mResolver;
+    private final Handler mHandler;
+    private final SettingsObserver mSettingsObserver;
 
     // Save the previous STATUS_HISTORY_SIZE states for logging.
     private final String[] mMobileStatusHistory = new String[STATUS_HISTORY_SIZE];
@@ -194,6 +202,36 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                     !nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
             }
         };
+
+        mResolver = context.getContentResolver();
+        mHandler = new Handler();
+        mSettingsObserver = new SettingsObserver(mHandler);
+        mSettingsObserver.register();
+    }
+
+    class SettingsObserver extends ContentObserver {
+
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void register() {
+            mResolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHOW_FOURG_ICON),
+                    false, this, UserHandle.USER_ALL);
+            updateSettings();
+        }
+
+        void updateSettings() {
+            mConfig = Config.readConfig(mContext);
+            setConfiguration(mConfig);
+            notifyListeners();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateSettings();
+        }
     }
 
     void setConfiguration(Config config) {
