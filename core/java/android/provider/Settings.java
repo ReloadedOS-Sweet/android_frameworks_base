@@ -6177,6 +6177,11 @@ public final class Settings {
         public static final String PULSE_TRIGGER_REASON = "pulse_trigger_reason";
 
         /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_WEATHER_TEXT = "lockscreen_weather_text";
+
+        /**
          * These are all public system settings
          *
          * @hide
