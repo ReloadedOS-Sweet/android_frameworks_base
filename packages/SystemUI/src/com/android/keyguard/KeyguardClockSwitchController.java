@@ -47,11 +47,13 @@ import com.android.systemui.aospaplus.CurrentWeatherView;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.lockscreen.LockScreenWidgets;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.log.dagger.KeyguardClockLog;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.ClockRegistry;
@@ -62,6 +64,8 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -95,6 +99,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final ClockEventController mClockEventController;
     private final LogBuffer mLogBuffer;
     private final TunerService  mTunerService;
+    private final ActivityStarter mActivityStarter;
+    private final ConfigurationController mConfigurationController;
+    private final FlashlightController mFlashlightController;
 
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
@@ -183,7 +190,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             ClockEventController clockEventController,
             @KeyguardClockLog LogBuffer logBuffer,
             KeyguardInteractor keyguardInteractor,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            ActivityStarter activityStarter,
+            ConfigurationController configurationController,
+            FlashlightController flashlightController) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mClockRegistry = clockRegistry;
@@ -198,6 +208,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mLogBuffer = logBuffer;
         mView.setLogBuffer(mLogBuffer);
         mFeatureFlags = featureFlags;
+        mActivityStarter = activityStarter;
+        mConfigurationController = configurationController;
+        mFlashlightController = flashlightController;
         mKeyguardInteractor = keyguardInteractor;
 
         mClockChangedListener = new ClockRegistry.ClockChangeListener() {
@@ -251,6 +264,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
         mCurrentWeatherView = mView.findViewById(R.id.weather_container);
         mCustomClockFrame = mView.findViewById(R.id.clock_ls);
+        View kgWidgets = mCustomClockFrame.findViewById(R.id.keyguard_widgets);
+        LockScreenWidgets lsWidgets = mCustomClockFrame.findViewById(R.id.lockscreen_widgets);
+        lsWidgets.setActivityStarter(mActivityStarter);
+        lsWidgets.setConfigurationController(mConfigurationController);
+        lsWidgets.setFlashLightController(mFlashlightController);
+        lsWidgets.setStatusBarStateController(mStatusBarStateController);
+
         if (!mOnlyClock) {
             mDumpManager.unregisterDumpable(getClass().toString()); // unregister previous clocks
             mDumpManager.registerDumpable(getClass().toString(), this);
