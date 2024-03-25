@@ -1285,7 +1285,7 @@ public class Instrumentation {
                 .instantiateApplication(cl, className);
         app.attach(context);
         PropImitationHooks.setProps(context);
-        GamesPropsUtils.setProps(context);
+        GamesPropsUtils.setProps(app);
         return app;
     }
     
@@ -1304,7 +1304,7 @@ public class Instrumentation {
         Application app = (Application)clazz.newInstance();
         app.attach(context);
         PropImitationHooks.setProps(context);
-        GamesPropsUtils.setProps(context);
+        GamesPropsUtils.setProps(app);
         return app;
     }
 
