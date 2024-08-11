@@ -104,9 +104,6 @@
     <!-- Internet Dialog -->
     <color name="connected_network_primary_color">@color/material_dynamic_primary80</color>
     <color name="connected_network_secondary_color">@color/material_dynamic_secondary80</color>
-
-    <!-- Volume panel -->
-    <color name="volume_seekbar_bg">@android:color/system_accent2_700</color>
     
     <!-- Footer Actions -->
     <color name="footer_actions_bg">@android:color/system_neutral1_900</color>
