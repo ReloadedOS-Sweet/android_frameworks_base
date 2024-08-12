@@ -181,10 +181,6 @@
     <!-- Name of a font family to use as regular font. For theming purpose. -->
     <string name="config_regularFontFamily" translatable="false">sans-serif-regular</string>
 
-    <!-- List of system apps that are allowed to be locked with app lock.
-        Use with extreme caution. -->
-    <string-array name="config_appLockAllowedSystemApps" translatable="false" />
-
     <!-- Is the battery LED intrusive? Used to decide if there should be a disable option -->
     <bool name="config_intrusiveBatteryLed">@bool/config_intrusiveNotificationLed</bool>
 
